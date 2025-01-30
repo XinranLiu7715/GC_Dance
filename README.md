@@ -3,3 +3,20 @@ GCDance is a classifier-free diffusion model for generating genre-specific dance
 
 ![GCDance cover](images/f1-top.png)
 
+
+
+### Training
+```python
+accelerate launch train.py --wandb
+```
+
+### Generate
+
+```python
+python test.py --test_gen
+```
+### Evaluate
+
+```python
+python test.py --eval --type 0
+```
