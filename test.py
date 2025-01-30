@@ -108,12 +108,9 @@ def test(opt):
     all_text_fea = []
     music_dir = opt.data_path+'test_all/wav2clip_fea'
     music_basic_dir = opt.data_path+'test_all/Basic_music_fea/sftf'
-
-    motion_save_dir = "test_term/motion"
-    feature_type = "baseline"
+    motion_save_dir = "test/motion"
     json_file = opt.genre_json
     name_to_style = {}
-    
     wav_fea =  sorted(glob.glob(os.path.join(music_dir,'*.pkl')), key=stringintkey)
     clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
     tokenizer = AutoTokenizer.from_pretrained("openai/clip-vit-base-patch32")
@@ -133,7 +130,7 @@ def test(opt):
             reps_basic = np.load(wav_basic).T
             reps =  np.concatenate((reps, reps_basic), axis=-1)
             cond_list.append(reps)
-            wav_name = os.path.join(wavs.split(feature_type)[0],'wavs_sliced',filename.split('.')[0]+'.wav')
+            wav_name = os.path.join(opt.data_path,'/test_all/wavs_sliced',filename.split('.')[0]+'.wav')
             file_list.append(wav_name)
             save_name = filename.split('_')[0]
             genre = name_to_style[save_name]

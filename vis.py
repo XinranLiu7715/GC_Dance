@@ -704,97 +704,25 @@ class SMPLX_Skeleton:
 if __name__ == "__main__":
     print("1")
     device = f'cuda:{0}'
-    vis = 4
-    if vis == 1:
-        smplx_fk = SMPLX_Skeleton(device = device)
-        motion_file = "/vol/research/CMVCG/xl/code/FineDance/test/motions/063_slice10.pkl"
-        music_file = "/vol/research/CMVCG/xl/dataset/test_all/wav_gt/063_slice10.wav"
-        local_q_165, root_pos = smplx_fk.motion_data_load_process(motion_file)
-        print("local_q_165.shape", local_q_165.shape)
-        print("root_pos.shape", root_pos.shape)
-        
-        
-        joints = smplx_fk.forward(local_q_165, root_pos).detach().cpu().numpy()            # 150, 165     150, 3
 
-        print("joints.shape", joints.shape)
-        skeleton_render(
-                    joints,
-                    epoch=f"e{1}_b{1}",
-                    out="test/render",
-                    name=music_file,
-                    render=True,
-                    stitch=False,
-                    sound=True,
-                    smpl_mode="smplx"
-                )
-    if vis == 2:
-        smplx_fk = SMPLSkeleton()
-        motion_file = "/mnt/fast/nobackup/scratch4weeks/xl01315/code/FineDance_wav2clip_cross16_nomask_v21/tests/motions/063_slice13.pkl"
-        music_file = "/vol/research/CMVCG/xl/dataset/test_all/wavs_sliced/012_slice22.wav"
-        motion =  pickle.load(open(motion_file,'rb'))
+    motion_dir = 'test/motions'
+    motion_fea =  sorted(glob.glob(os.path.join(motion_dir,'*.pkl')))
+    for motion in motion_fea:
+        moname = os.path.basename(motion).split('.')[0]
+        print(moname)
+        music_file = "/vol/research/CMVCG/xl/dataset/test_all/wavs_sliced/"+moname+".wav"
+        motion =  pickle.load(open(motion,'rb'))
         joints = motion['full_pose']
 
         print("joints.shape", joints.shape)
         skeleton_render(
                     joints,
                     epoch=f"e{1}_b{1}",
-                    out="test/render",
+                    out="renders/36",
                     name=music_file,
                     render=True,
                     stitch=False,
                     sound=False,
                     smpl_mode="smplx"
-                )
-    if vis == 3:
-        motion_dir = '/mnt/fast/nobackup/scratch4weeks/xl01315/dataset/test_all/motion_sliced_gt'
-        motion_fea =  sorted(glob.glob(os.path.join(motion_dir,'*.pkl')))
-        for motion in motion_fea:
-            moname = os.path.basename(motion).split('.')[0]
-            #if '036' not in moname:
-            #    continue
-            print(moname)
-            music_file = "/vol/research/CMVCG/xl/dataset/test_all/wavs_sliced/"+moname+".wav"
-            smplx_fk = SMPLX_Skeleton(device = device)
-            mofea =  pickle.load(open(motion, "rb"))
-            mofea = torch.from_numpy(mofea)
-            sample_contact, samples = torch.split(
-                mofea, (4, 319 - 4), dim=1
-            )
-            s, c = samples.shape
-            pos = samples[ :, :3] # np.zeros((sample.shape[0], 3))
-            q = samples[ :, 3:].reshape( s, -1, 6)
-            q = ax_from_6v(q).to(device).reshape(s,-1)
-            joints = smplx_fk.forward(q, pos).detach().cpu().numpy()
-            poses = joints.reshape( s, -1, 3)
-            skeleton_render(
-                    poses,
-                    epoch=f"e{1}_b{1}",
-                    out="renders/gt",
-                    name=music_file,
-                    render=True,
-                    stitch=False,
-                    sound=False,
-                    smpl_mode="smplx"
-                )
-    if vis == 4:
-        motion_dir = '/mnt/fast/nobackup/scratch4weeks/xl01315/code/FineDance_wav2clip_cross16_v9_1/motions_best'
-        motion_fea =  sorted(glob.glob(os.path.join(motion_dir,'*.pkl')))
-        for motion in motion_fea:
-            moname = os.path.basename(motion).split('.')[0]
-            print(moname)
-            music_file = "/vol/research/CMVCG/xl/dataset/test_all/wavs_sliced/"+moname+".wav"
-            motion =  pickle.load(open(motion,'rb'))
-            joints = motion['full_pose']
-
-            print("joints.shape", joints.shape)
-            skeleton_render(
-                        joints,
-                        epoch=f"e{1}_b{1}",
-                        out="renders/36",
-                        name=music_file,
-                        render=True,
-                        stitch=False,
-                        sound=False,
-                        smpl_mode="smplx"
-            )
+        )
         
