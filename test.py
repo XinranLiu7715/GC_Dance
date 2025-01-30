@@ -108,7 +108,6 @@ def test(opt):
     all_text_fea = []
     music_dir = opt.data_path+'test_all/wav2clip_fea'
     music_basic_dir = opt.data_path+'test_all/Basic_music_fea/sftf'
-    motion_save_dir = "test/motion"
     json_file = opt.genre_json
     name_to_style = {}
     wav_fea =  sorted(glob.glob(os.path.join(music_dir,'*.pkl')), key=stringintkey)
@@ -163,7 +162,7 @@ def test(opt):
             "test", 
             "renders/test",
             render_count=-1, 
-            fk_out=motion_save_dir, 
+            fk_out=opt.motion_save_dir, 
             mode="normal",  
             render=True,
         )

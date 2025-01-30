@@ -702,23 +702,20 @@ class SMPLX_Skeleton:
     
     
 if __name__ == "__main__":
-    print("1")
     device = f'cuda:{0}'
-
-    motion_dir = 'test/motions'
+    opt = test_opt()
+    motion_dir = opt.motion_save_dir
     motion_fea =  sorted(glob.glob(os.path.join(motion_dir,'*.pkl')))
     for motion in motion_fea:
         moname = os.path.basename(motion).split('.')[0]
-        print(moname)
-        music_file = "/vol/research/CMVCG/xl/dataset/test_all/wavs_sliced/"+moname+".wav"
+        music_file = os.path.join(opt.data_path, "/test_all/wavs_sliced", moname+".wav")
         motion =  pickle.load(open(motion,'rb'))
         joints = motion['full_pose']
-
         print("joints.shape", joints.shape)
         skeleton_render(
                     joints,
                     epoch=f"e{1}_b{1}",
-                    out="renders/36",
+                    out="test/renders",
                     name=music_file,
                     render=True,
                     stitch=False,
