@@ -28,10 +28,8 @@ import pdb
 import math
 
 def eval_metirc(opt):
-    if opt.test_10:
-        gt_path = '/mnt/fast/nobackup/scratch4weeks/xl01315/dataset/test_10'
-    else:
-        gt_path = '/mnt/fast/nobackup/scratch4weeks/xl01315/dataset/test_all'
+    
+    gt_path = 'dataset/test_all'
         
     pred_path = "tests/motions"
     
@@ -59,14 +57,12 @@ def eval_metirc(opt):
     else:
         #calculate the fid and divt.
         #GT motion 
-        #calc_and_save_feats(opt,mofea_gt_path,gt_motion_path,1,hand)
+        calc_and_save_feats(opt,mofea_gt_path,gt_motion_path,1,hand)
         #pred motion
         calc_and_save_feats(opt,mofea_pred_path,pred_path,0,hand)
         print(quantized_metrics(mofea_pred_path, mofea_gt_path))
 
     return
-
-
 
 
 def slice_audio(audio_file, stride, length, out_dir):
@@ -84,45 +80,7 @@ def slice_audio(audio_file, stride, length, out_dir):
         idx += 1
     return idx
 
-def extract(fpath):
-    FPS = 30
-    HOP_LENGTH = 512
-    SR = FPS * HOP_LENGTH
-    EPS = 1e-6
 
-    data, _ = librosa.load(fpath, sr=SR)
-    envelope = librosa.onset.onset_strength(y=data, sr=SR)  # (seq_len,)
-    mfcc = librosa.feature.mfcc(y=data, sr=SR, n_mfcc=20).T  # (seq_len, 20)
-    chroma = librosa.feature.chroma_cens(
-        y=data, sr=SR, hop_length=HOP_LENGTH, n_chroma=12
-    ).T  # (seq_len, 12)
-
-    peak_idxs = librosa.onset.onset_detect(
-        onset_envelope=envelope.flatten(), sr=SR, hop_length=HOP_LENGTH
-    )
-    peak_onehot = np.zeros_like(envelope, dtype=np.float32)
-    peak_onehot[peak_idxs] = 1.0  # (seq_len,)
-
-    start_bpm = lr.beat.tempo(y=lr.load(fpath)[0])[0]
-
-    tempo, beat_idxs = librosa.beat.beat_track(
-        onset_envelope=envelope,
-        sr=SR,
-        hop_length=HOP_LENGTH,
-        start_bpm=start_bpm,
-        tightness=100,
-    )
-    beat_onehot = np.zeros_like(envelope, dtype=np.float32)
-    beat_onehot[beat_idxs] = 1.0  # (seq_len,)
-
-    audio_feature = np.concatenate(
-        [envelope[:, None], mfcc, chroma, peak_onehot[:, None], beat_onehot[:, None]],
-        axis=-1,
-    )
-
-    # chop to ensure exact shape
-    audio_feature = audio_feature[:4 * FPS]
-    return audio_feature
 
 # sort filenames that look like songname_slice{number}.ext
 key_func = lambda x: int(os.path.splitext(x)[0].split("_")[-1].split("slice")[-1])
@@ -220,6 +178,8 @@ def test(opt):
 
 if __name__ == "__main__":
     opt = test_opt()
-    test(opt)
-    #eval_metirc(opt)
+    if opt.test_gen:
+        test(opt)
+    if opt.eval
+        eval_metirc(opt)
 

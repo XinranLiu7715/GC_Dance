@@ -135,7 +135,7 @@ def test_opt():
     parser.add_argument(
         "--data_dir",
         type=str,
-        default="/vol/research/CMVCG/xl/dataset/test_10",
+        default="dataset/test_10",
         help="Where to save/load the features",
     )
     parser.add_argument(
@@ -152,6 +152,10 @@ def test_opt():
         "--test_gen", 
         action="store_true", 
         help="Random test 10 times")
+    parser.add_argument(
+        "--eval", 
+        action="store_true", 
+        help="Evaluate the metric")
     opt = parser.parse_args()
     return opt
 
