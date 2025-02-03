@@ -16,10 +16,10 @@ def train_opt():
         "--motion_dir", type=str, default="dataset/train/motion_fea319", help="dataset motion"
     )
     parser.add_argument(
-        "--music_fm_dir", type=str, default="dataset/train/wav2clip_fea", help="dataset motion"
+        "--music_fm_dir", type=str, default="dataset/train/music/wav2clip_fea", help="dataset motion"
     )
     parser.add_argument(
-        "--music_basic_dir", type=str, default="dataset/train/music_npy", help="dataset motion"
+        "--music_basic_dir", type=str, default="dataset/train/music/basic_fea", help="dataset motion"
     )
     parser.add_argument(
         "--wav_dir", type=str, default="dataset/finedance/music_wav", help="dataset motion"

@@ -1,8 +1,6 @@
 import numpy as np
 import pickle 
-
 import json
-# kinetic, manual
 import argparse
 import os
 from essentia.standard import *
@@ -11,12 +9,9 @@ from scipy.signal import argrelextrema
 from extractor import FeatureExtractor
 import torch
 from dataset.quaternion import ax_to_6v, ax_from_6v
-
-
 import matplotlib.pyplot as plt 
-import pdb
-extractor = FeatureExtractor()
 
+extractor = FeatureExtractor()
 def extract_acoustic_feature(audio, sr):
 
     melspe_db = extractor.get_melspectrogram(audio, sr)

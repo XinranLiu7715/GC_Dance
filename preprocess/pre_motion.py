@@ -7,12 +7,25 @@ import sys
 from tqdm import tqdm
 import glob
 import numpy as np
-
 sys.path.append(os.getcwd()) 
 from dataset.quaternion import ax_to_6v, ax_from_6v
 from dataset.preprocess import Normalizer, vectorize_many
 
+def parse_eval_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--motion_dir', type=str, default='dataset/finedance/motion')
+    parser.add_argument('--store_dir', type=str, default='dataset/train/motion_fea319')
+    args = parser.parse_args()
+    return args
 
+args = parse_eval_args()
+store_dir = args.store_dir
+extractor = FeatureExtractor()
+if not os.path.exists(args.store_dir):
+    os.mkdir(args.store_dir)
+    
+    
+    
 def motion_feats_extract(inputs_dir, outputs_dir):
     device = "cuda:0"
     print("extracting")
@@ -22,7 +35,7 @@ def motion_feats_extract(inputs_dir, outputs_dir):
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
     # All motion is retargeted to this standard model.
-    smplx_model = smplx.SMPLX(model_path='/vol/research/CMVCG/xl/code/FineDance/assets/smpl_model/smplx', ext='npz', gender='neutral',
+    smplx_model = smplx.SMPLX(model_path='assets/smpl_model/smplx', ext='npz', gender='neutral',
                              num_betas=10, flat_hand_mean=True, num_expression_coeffs=10, use_pca=False).eval().to(device)
         
     motions = sorted(glob.glob(os.path.join(inputs_dir, "*.npy")))
@@ -39,7 +52,6 @@ def motion_feats_extract(inputs_dir, outputs_dir):
         print("local_q_rot6d", local_q_rot6d.shape)
         local_q = local_q_rot6d.reshape(length, 52, 6).clone()
         local_q = ax_from_6v(local_q).view(length, 156)           # T, 156
-        
         smplx_output = smplx_model(
                 betas = torch.zeros([root_pos.shape[0], 10], device=device, dtype=torch.float32),
                 transl = root_pos,        # global translation
@@ -53,8 +65,6 @@ def motion_feats_extract(inputs_dir, outputs_dir):
                 expression = torch.zeros([root_pos.shape[0], 10], device=device, dtype=torch.float32),
                 return_verts = False
         )
-        
-        
         positions = smplx_output.joints.view(length, -1, 3)   # bxt, j, 3
         feet = positions[:, (7, 8, 10, 11)]  # # 150, 4, 3
         feetv = torch.zeros(feet.shape[:2], device=device)     # 150, 4
@@ -70,4 +80,4 @@ def motion_feats_extract(inputs_dir, outputs_dir):
 
     
 if __name__ == "__main__":
-    motion_feats_extract("/vol/research/CMVCG/xl/dataset/finedance/motion", "/vol/research/CMVCG/xl/dataset/train/motion_fea319")
+    motion_feats_extract(args.motion_dir, args.store_dir)

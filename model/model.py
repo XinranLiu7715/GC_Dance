@@ -14,7 +14,6 @@ import os
 
 class DenseFiLM(nn.Module):
     """Feature-wise linear modulation (FiLM) generator."""
-
     def __init__(self, embed_channels):
         super().__init__()
         self.embed_channels = embed_channels

@@ -2,9 +2,7 @@ import glob
 import os
 import re
 from pathlib import Path
-
 import torch
-
 from .scaler import MinMaxScaler
 import pickle
 

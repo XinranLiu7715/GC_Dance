@@ -1,11 +1,9 @@
 from inspect import isfunction
 from math import log, pi
-
 import torch
 from einops import rearrange, repeat
 from torch import einsum, nn
 
-# helper functions
 
 
 def exists(val):

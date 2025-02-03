@@ -62,11 +62,8 @@ def tem_data():
 
         return train_list, test_list, ignor_list
 
-    
 
-
-
-class FineDance_Smpl(data.Dataset):
+class Pre_Smpl(data.Dataset):
     def __init__(self, args, istrain):
         self.motion_dir =args.motion_dir
         self.music_fm_dir = args.music_fm_dir
@@ -107,7 +104,7 @@ class FineDance_Smpl(data.Dataset):
                 continue
             motion = np.load(os.path.join(self.motion_dir, name))
             fm_music = np.load(os.path.join(self.music_fm_dir, name))
-            music_basic = np.load(os.path.join(self.music_basic_dir, name)).T
+            music_basic = np.load(os.path.join(self.music_basic_dir, name))
 
             if len(music_basic) < len(fm_music):
                 fm_music = fm_music[:len(music_basic)]
@@ -115,7 +112,7 @@ class FineDance_Smpl(data.Dataset):
             min_all_len = min(motion.shape[0], fm_music.shape[0])
             motion = motion[:min_all_len]
             if motion.shape[-1] == 168:
-                motion = np.concatenate([motion[:,:69], motion[:,78:]], axis=1)     # 22,  25
+                motion = np.concatenate([motion[:,:69], motion[:,78:]], axis=1)  
             elif motion.shape[-1] == 319:
                 pass
             elif motion.shape[-1] == 315:

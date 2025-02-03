@@ -2,24 +2,25 @@ import numpy as np
 import pickle 
 import glob
 from scipy import linalg
-import pdb
-from extract_aist_features import extract_feature
-
-
 from pytorch3d.transforms import (RotateAxisAngle, quaternion_to_axis_angle,
                                   quaternion_multiply, quaternion_apply,matrix_to_axis_angle,rotation_6d_to_matrix,
                                   axis_angle_to_quaternion
                                   )
-
-
-# kinetic, manual
 import os
+import argparse
+from features.kinetic import extract_kinetic_features
+from features.manual_new import extract_manual_features
+from vis import SMPLX_Skeleton, SMPLSkeleton
+import torch
+import multiprocessing
+import functools
+from dataset.quaternion import ax_from_6v
+
 
 def normalize(feat, feat2):
     mean = feat.mean(axis=0)
     std = feat.std(axis=0)
     return (feat - mean) / (std + 1e-10), (feat2 - mean) / (std + 1e-10)
-
 
 def quantized_metrics(predicted_pkl_root, gt_pkl_root):
 
@@ -135,6 +136,62 @@ def calculate_avg_distance(feature_list, mean=None, std=None):
             dist += np.linalg.norm(feature_list[i] - feature_list[j])
     dist /= (n * n - n) / 2
     return dist
+
+def extract_feature(opt,seq_name,motion_dir,save_dir,gt=0,hand=False):
+    # Parsing SMPL 52 joints.
+    
+    path = os.path.join(motion_dir,seq_name)
+    smpl_file = pickle.load(open(path, "rb"))
+    hand = hand
+    if gt ==1 :
+        s, c = smpl_file.shape
+        smpl_file = torch.from_numpy(smpl_file)
+        smpl_file = smpl_file.reshape(1,s,c)
+        _, model_out = torch.split(smpl_file, (4, smpl_file.shape[2] - 4), dim=2)
+        model_x = model_out[:, :, :3]
+        model_q = ax_from_6v(model_out[:, :, 3:].reshape(1, s, -1, 6))
+        if opt.nfeats == 139:
+            smpl = SMPLSkeleton()
+            keypoints3d = smpl.forward(model_q, model_x)
+            keypoints3d = keypoints3d.reshape(s,-1,3).numpy()
+        else:
+            smpl = SMPLX_Skeleton()
+            b, s, nums, c_ = model_q.shape
+            model_q = model_q.view(s, -1)
+            model_x = model_x.view(-1, 3)
+            keypoints3d = smpl.forward(model_q, model_x).numpy()
+            if hand:
+                keypoints3d = keypoints3d[:,25:,:]
+            else:
+                keypoints3d = keypoints3d[:,:22,:]
+        #print(keypoints3d.shape)
+
+    else:
+        keypoints3d = smpl_file['full_pose']
+        if opt.nfeats == 319:
+            if hand:
+                keypoints3d = keypoints3d[:,25:,:]
+            else:
+                keypoints3d = keypoints3d[:,:22,:]
+        #print(keypoints3d.shape)
+        
+
+    # test the body 
+    roott = keypoints3d[:1, :1]  # the root
+    keypoints3d = keypoints3d - roott  # Calculate relative offset with respect to root
+    #features: 32 x 1
+    if gt != 1:
+        seq_name  =seq_name.split('_')[-2:]
+        seq_name =seq_name[0]+'_'+seq_name[1]
+    #features = extract_manual_features(keypoints3d)
+    #np.save(os.path.join(save_dir, 'manual_features', seq_name.split('.pkl')[0]+"_manual.npy"), features)
+    
+    # keypoint3s: N x 24 x 3 
+    # features: 72 x 1
+    features = extract_kinetic_features(keypoints3d)
+    np.save(os.path.join(save_dir, 'kinetic_features', seq_name.split('.pkl')[0]+"_kinetic.npy"), features)
+    #print (seq_name, "is done")
+    
 
 def calc_and_save_feats(opt, save_dir, motion_dir,gt=0,hand=False):
     os.makedirs(save_dir, exist_ok=True)

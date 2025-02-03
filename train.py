@@ -13,7 +13,7 @@ from accelerate import Accelerator, DistributedDataParallelKwargs
 from accelerate.state import AcceleratorState
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from dataset.FineDance_dataset import FineDance_Smpl
+from dataset.pre_dataset import Pre_Smpl
 from dataset.preprocess import increment_path
 from dataset.preprocess import My_Normalizer as Normalizer        
 from model.adan import Adan
@@ -123,7 +123,7 @@ class GCdance:
     
     def train_loop(self, opt):
         print("train_dataset = FineDance_Dataset ")  
-        train_dataset = FineDance_Smpl(
+        train_dataset = Pre_Smpl(
             args=opt,           
             istrain=True,
         )
@@ -135,7 +135,7 @@ class GCdance:
             train_dataset,
             batch_size=opt.batch_size,
             shuffle=True,
-            num_workers=min(int(num_cpus * 0.5), 1),      # num_workers=min(int(num_cpus * 0.75), 32), 
+            num_workers=min(int(num_cpus * 0.5), 16),      
             pin_memory=True,
             drop_last=True,
         )
@@ -156,7 +156,7 @@ class GCdance:
             wdir = save_dir / "weights"
             wdir.mkdir(parents=True, exist_ok=True)
             if opt.wandb:
-                wandb.save("params.yaml")  # 保存wandb配置到文件
+                wandb.save("params.yaml") 
             yaml_path = os.path.join(wdir, 'parameters.yaml')
             save_arguments_to_yaml(opt, yaml_path)
 
@@ -168,7 +168,6 @@ class GCdance:
             avg_vloss = 0
             avg_fkloss = 0
             avg_footloss = 0
-
             # train
             self.train()
             for step, (x, cond, filename, text) in enumerate(
@@ -197,7 +196,6 @@ class GCdance:
             #-----------------------------------------------------------------------------------------------------------
             # test
             # Save model
-        
             if ((epoch+self.resume_num) % opt.save_interval) == 0  or epoch<=1:
                 self.accelerator.wait_for_everyone()
                 self.eval()    
@@ -253,8 +251,6 @@ class GCdance:
         cond = cond.to(self.accelerator.device).float()
         text = text.to(self.accelerator.device).float()
         motion= []
-
-
         self.diffusion.render_sample(
             shape,
             motion,
