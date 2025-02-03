@@ -82,8 +82,8 @@ class Pre_Smpl(data.Dataset):
         motion_all = []
         music_all = []
         
-        #train_list, test_list, ignor_list = get_train_test_list(args.datasplit)
-        train_list, test_list, ignor_list = tem_data()
+        train_list, test_list, ignor_list = get_train_test_list(args.datasplit)
+        #train_list, test_list, ignor_list = tem_data()
         
         if self.istrain:
             self.datalist= train_list
