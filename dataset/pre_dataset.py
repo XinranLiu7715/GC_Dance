@@ -63,7 +63,7 @@ def tem_data():
         return train_list, test_list, ignor_list
 
 
-class Pre_Smpl(data.Dataset):
+class FineDance_Smpl(data.Dataset):
     def __init__(self, args, istrain):
         self.motion_dir =args.motion_dir
         self.music_fm_dir = args.music_fm_dir
@@ -79,11 +79,12 @@ class Pre_Smpl(data.Dataset):
 
         self.name = []
         self.genre = {}
+        self.style_index = []
         motion_all = []
         music_all = []
         
-        train_list, test_list, ignor_list = get_train_test_list(args.datasplit)
-        #train_list, test_list, ignor_list = tem_data()
+        #train_list, test_list, ignor_list = get_train_test_list(args.datasplit)
+        train_list, test_list, ignor_list = tem_data()
         
         if self.istrain:
             self.datalist= train_list
@@ -96,7 +97,6 @@ class Pre_Smpl(data.Dataset):
 
         model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
         tokenizer = AutoTokenizer.from_pretrained("openai/clip-vit-base-patch32")
-            
         for name in tqdm(self.datalist):
             save_name = name
             name = name + ".npy"
@@ -104,7 +104,7 @@ class Pre_Smpl(data.Dataset):
                 continue
             motion = np.load(os.path.join(self.motion_dir, name))
             fm_music = np.load(os.path.join(self.music_fm_dir, name))
-            music_basic = np.load(os.path.join(self.music_basic_dir, name))
+            music_basic = np.load(os.path.join(self.music_basic_dir, name)).T
 
             if len(music_basic) < len(fm_music):
                 fm_music = fm_music[:len(music_basic)]
@@ -112,7 +112,7 @@ class Pre_Smpl(data.Dataset):
             min_all_len = min(motion.shape[0], fm_music.shape[0])
             motion = motion[:min_all_len]
             if motion.shape[-1] == 168:
-                motion = np.concatenate([motion[:,:69], motion[:,78:]], axis=1)  
+                motion = np.concatenate([motion[:,:69], motion[:,78:]], axis=1)     # 22,  25
             elif motion.shape[-1] == 319:
                 pass
             elif motion.shape[-1] == 315:
@@ -160,17 +160,14 @@ class Pre_Smpl(data.Dataset):
             y = [prompt1 + genre + prompt2]
             inputs = tokenizer(y, padding=True, return_tensors="pt")
             text_embeddings = model.get_text_features(**inputs)
-            
             for i in index_:
                 self.text_all.append(text_embeddings.detach().numpy())
-            
 
             index_ = [save_name + "_" + str(element).zfill(5) for element in index_]
             self.motion_index += motion_index
             self.music_index += music_index
             total_length += min_all_len
             self.name += index_
-
         self.text_all =  np.concatenate(self.text_all, axis=0).astype(np.float32)
         self.motion = np.concatenate(motion_all, axis=0).astype(np.float32)
         self.music = np.concatenate(music_all, axis=0).astype(np.float32)

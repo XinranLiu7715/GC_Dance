@@ -13,7 +13,7 @@ from accelerate import Accelerator, DistributedDataParallelKwargs
 from accelerate.state import AcceleratorState
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from dataset.pre_dataset import Pre_Smpl
+from dataset.FineDance_dataset import FineDance_Smpl
 from dataset.preprocess import increment_path
 from dataset.preprocess import My_Normalizer as Normalizer        
 from model.adan import Adan
@@ -78,6 +78,7 @@ class GCdance:
             smplx_fk = SMPLSkeleton(device=self.accelerator.device)
         else:
             smplx_fk = SMPLX_Skeleton(device=self.accelerator.device, batch=512000)
+        
         diffusion = GaussianDiffusion(
             model,
             opt,
@@ -91,8 +92,13 @@ class GCdance:
             use_p2=False,
             cond_drop_prob=0.25,
             guidance_weight=2.7,
-            do_normalize = opt.do_normalize
+            do_normalize = opt.do_normalize,
+            mtl_method = opt.mtl_method,
+            Classification = opt.Classification
         )
+        
+        #for param in model.network['body_net'].SimpleClassifier.parameters():
+        #    param.requires_grad = False
 
         print(
             "Model has {} parameters".format(sum(y.numel() for y in model.parameters()))
@@ -100,7 +106,7 @@ class GCdance:
 
         self.model = self.accelerator.prepare(model)
         self.diffusion = diffusion.to(self.accelerator.device)
-        self.smplx_fk = smplx_fk     # to(self.accelerator.device)
+        self.smplx_fk = smplx_fk   
         optim = Adan(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
         self.optim = self.accelerator.prepare(optim)
 
@@ -123,7 +129,7 @@ class GCdance:
     
     def train_loop(self, opt):
         print("train_dataset = FineDance_Dataset ")  
-        train_dataset = Pre_Smpl(
+        train_dataset = FineDance_Smpl(
             args=opt,           
             istrain=True,
         )
@@ -135,7 +141,7 @@ class GCdance:
             train_dataset,
             batch_size=opt.batch_size,
             shuffle=True,
-            num_workers=min(int(num_cpus * 0.5), 16),      
+            num_workers=min(int(num_cpus * 0.5), 8),      # num_workers=min(int(num_cpus * 0.75), 32), 
             pin_memory=True,
             drop_last=True,
         )
@@ -151,12 +157,12 @@ class GCdance:
             save_dir = str(increment_path(Path(opt.project) / opt.exp_name))
             opt.exp_name = save_dir.split("/")[-1]
             if opt.wandb:
-                wandb.init(project=opt.wandb_pj_name, name=opt.exp_name,resume=False,settings=wandb.Settings(_service_wait=60))
+                wandb.init(project=opt.wandb_pj_name, name=opt.exp_name,resume=False)
             save_dir = Path(save_dir)
             wdir = save_dir / "weights"
             wdir.mkdir(parents=True, exist_ok=True)
             if opt.wandb:
-                wandb.save("params.yaml") 
+                wandb.save("params.yaml")  # 保存wandb配置到文件
             yaml_path = os.path.join(wdir, 'parameters.yaml')
             save_arguments_to_yaml(opt, yaml_path)
 
@@ -168,6 +174,7 @@ class GCdance:
             avg_vloss = 0
             avg_fkloss = 0
             avg_footloss = 0
+
             # train
             self.train()
             for step, (x, cond, filename, text) in enumerate(
@@ -196,6 +203,7 @@ class GCdance:
             #-----------------------------------------------------------------------------------------------------------
             # test
             # Save model
+        
             if ((epoch+self.resume_num) % opt.save_interval) == 0  or epoch<=1:
                 self.accelerator.wait_for_everyone()
                 self.eval()    
@@ -216,7 +224,7 @@ class GCdance:
                     
                     if ((epoch+self.resume_num) % (opt.save_interval*10)) == 0 or epoch<=1:
                         ckpt = {
-                            "ema_state_dict": self.diffusion.master_model.state_dict(),     # 经过accelerate prepare的模型，在保存时需要unwrap，反之不需要
+                            "ema_state_dict": self.diffusion.master_model.state_dict(),    
                             "model_state_dict": self.accelerator.unwrap_model(
                                 self.model
                             ).state_dict(),
@@ -251,6 +259,8 @@ class GCdance:
         cond = cond.to(self.accelerator.device).float()
         text = text.to(self.accelerator.device).float()
         motion= []
+
+
         self.diffusion.render_sample(
             shape,
             motion,

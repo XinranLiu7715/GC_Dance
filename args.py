@@ -11,18 +11,17 @@ def train_opt():
     parser.add_argument(
         "--render_dir", type=str, default="renders", help="Sample render path"
     )
-    
     parser.add_argument(
         "--motion_dir", type=str, default="dataset/train/motion_fea319", help="dataset motion"
     )
     parser.add_argument(
-        "--music_fm_dir", type=str, default="dataset/train/music/wav2clip_fea", help="dataset motion"
+        "--music_fm_dir", type=str, default="dataset/train/wav2clip_fea", help="Hand-crafted Feature"
     )
     parser.add_argument(
-        "--music_basic_dir", type=str, default="dataset/train/music/basic_fea", help="dataset motion"
+        "--music_basic_dir", type=str, default="dataset/Basic_music_fea/stft", help="Music Foundation Model Feature"
     )
     parser.add_argument(
-        "--wav_dir", type=str, default="dataset/finedance/music_wav", help="dataset motion"
+        "--wav_dir", type=str, default="dataset/finedance/music_wav", help="Raw music data"
     )
     parser.add_argument(
         "--full_seq_len", type=int, default=120, help="full_seq_len"
@@ -36,7 +35,7 @@ def train_opt():
     parser.add_argument(
         "--wandb_pj_name", type=str, default="dance_gen", help="project name"
     )
-    parser.add_argument("--batch_size", type=int, default=128, help="batch size")        # default=64
+    parser.add_argument("--batch_size", type=int, default=128, help="batch size")       
     parser.add_argument("--epochs", type=int, default=2000)
     parser.add_argument(
         "--save_interval",
@@ -65,6 +64,13 @@ def train_opt():
     parser.add_argument(
         "--genre_json", type=str, default='dataset/finedance/dance_lable_data.json', help="json file"
     ) 
+    parser.add_argument(
+        "--Classification", action="store_true", help="use classify while training"
+    )
+    parser.add_argument(
+        "--mtl_method", type=str, default='Nash', help="Muti-Task Learning method"
+    ) 
+    
     opt = parser.parse_args()
     return opt
 
@@ -135,7 +141,7 @@ def test_opt():
     parser.add_argument(
         "--data_dir",
         type=str,
-        default="dataset/test_10",
+        default="/vol/research/CMVCG/xl/dataset/test_10",
         help="Where to save/load the features",
     )
     parser.add_argument(
@@ -152,10 +158,6 @@ def test_opt():
         "--test_gen", 
         action="store_true", 
         help="Random test 10 times")
-    parser.add_argument(
-        "--eval", 
-        action="store_true", 
-        help="Evaluate the metric")
     opt = parser.parse_args()
     return opt
 

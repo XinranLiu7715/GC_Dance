@@ -18,6 +18,8 @@ from vis import skeleton_render, process_dataset
 from vis import SMPLX_Skeleton
 from dataset.preprocess import My_Normalizer as Normalizer
 from .utils import extract, make_beta_schedule
+from methodMTL.Aligned.balancer import AlignedMTLBalancer
+from methodMTL.Nash.weight_methods import NashMTL
 
 def identity(t, *args, **kwargs):
     return t
@@ -57,6 +59,8 @@ class GaussianDiffusion(nn.Module):
         use_p2=False,
         cond_drop_prob=0.2,
         do_normalize=False,
+        mtl_method=None,
+        Classification = False
     ):
         super().__init__()
         self.horizon = horizon
@@ -67,8 +71,25 @@ class GaussianDiffusion(nn.Module):
         self.normalizer = None
         self.do_normalize = do_normalize
         self.opt = opt
-
+        self.mtl_method = mtl_method
         self.cond_drop_prob = cond_drop_prob
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.classfy = Classification
+        
+        if self.classfy:
+            self.n_task = 5
+        else:
+            self.n_task = 4
+        
+        if self.mtl_method == 'Nash':
+            self.MTL = NashMTL(n_tasks=self.n_task, device=self.device)
+        if self.mtl_method == 'Aligned':
+            self.MTL = AlignedMTLBalancer(
+                scale_mode='min', 
+                scale_decoder_grad=False, 
+                compute_stats=True
+            )
+            
 
         # make a SMPL instance for FK module
         self.smplx_fk = smplx_model
@@ -477,7 +498,17 @@ class GaussianDiffusion(nn.Module):
         noise = torch.randn_like(x_start)
         x_noisy = self.q_sample(x_start=x_start, t=t, noise=noise)
         # reconstruct
-        x_recon = self.model(x_noisy, cond, t, text, cond_drop_prob=self.cond_drop_prob)
+        
+        if self.classfy:
+            x_recon, genre_classify = self.model(x_noisy, cond, t, text, cond_drop_prob=self.cond_drop_prob)
+            classification_loss = 0.0
+            if style_label is not None:
+                cross_criterion = torch.nn.CrossEntropyLoss()
+                classification_loss = cross_criterion(genre_classify, style_label)
+            else:
+                classification_loss = torch.tensor(0.0, device=x_start.device)
+        else:
+            x_recon = self.model(x_noisy, cond, t, text, cond_drop_prob=self.cond_drop_prob)
 
         assert noise.shape == x_recon.shape
 
@@ -546,13 +577,64 @@ class GaussianDiffusion(nn.Module):
             model_foot_v, torch.zeros_like(model_foot_v), reduction="none"
         )
         foot_loss = reduce(foot_loss, "b ... -> b (...)", "mean")
-        losses = (
-            0.636 * loss.mean(),
-            2.964 * v_loss.mean(),
-            0.646 * fk_loss.mean(),
-            10.942 * foot_loss.mean(),
-        )
-        return sum(losses), losses
+        foot_loss = foot_loss * extract(self.p2_loss_weight, t, foot_loss.shape)
+        
+        if self.mtl_method == 'Nash':
+            if self.classfy:
+                loss = torch.stack([loss.mean(), v_loss.mean(), fk_loss.mean(), foot_loss.mean()],classification_loss)
+            else:    
+                loss = torch.stack([loss.mean(), v_loss.mean(), fk_loss.mean(), foot_loss.mean()])
+            
+            weighted_loss, extra_outputs = self.MTL.get_weighted_loss(
+                losses=loss,
+                shared_parameters=list(self.model.parameters()),
+                model = self.model
+            )
+            losses = (
+                extra_outputs['weights'][0] * loss.mean(),
+                extra_outputs['weights'][1] * v_loss.mean(),
+                extra_outputs['weights'][2] * fk_loss.mean(),
+                extra_outputs['weights'][3] * foot_loss.mean(),
+            )
+            
+        if self.mtl_method == 'Aligned':
+            if self.classfy:
+                losses_dict = {
+                'loss': loss.mean(),
+                'v_loss': v_loss.mean(),
+                'fk_loss': fk_loss.mean(),
+                'foot_loss': foot_loss.mean(),
+                'classification_loss':classification_loss
+                }
+            else:
+                losses_dict = {
+                'loss': loss.mean(),
+                'v_loss': v_loss.mean(),
+                'fk_loss': fk_loss.mean(),
+                'foot_loss': foot_loss.mean(),
+                }
+            weights = self.MTL.step(
+                losses=losses_dict,
+                shared_params=list(self.model.parameters()),
+                task_specific_params=None  
+            )
+            losses = (
+            weights[0] * loss.mean(),
+            weights[1] * v_loss.mean(),
+            weights[2] * fk_loss.mean(),
+            weights[3] * foot_loss.mean(),
+            )
+            weighted_loss = sum(losses)
+        else:
+            losses = (
+                0.636 * loss.mean(),
+                2.964 * v_loss.mean(),
+                0.646 * fk_loss.mean(),
+                10.942 * foot_loss.mean(),
+            )
+            weighted_loss = sum(losses)
+            
+        return weighted_loss, losses
 
     def loss(self, x, cond, text, t_override=None):
         batch_size = len(x)
