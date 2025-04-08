@@ -1,7 +1,7 @@
 # GCDance: Genre-Controlled 3D Full Body Dance Generation Driven By Music
 GCDance is a classifier-free diffusion model for generating genre-specific dance motions conditioned on both music and textual prompts. This approach enables the model to generate diverse dance styles from the same piece of music while ensuring coherence with the rhythm and melody of the music. The demos can be seen on /dance_demo.
 
-![GCDance cover](images/f1-top.png)
+![GCDance cover](images/top-1.png)
 
 ## Data preparation
 
@@ -19,8 +19,14 @@ python preprocess/pre_music.py --music_dir --store_dir
 
 
 ### Training
+We provide two training modes:
+#### Aligned Training
 ```python
-accelerate launch train.py --wandb
+accelerate launch train.py --wandb --mtl_method Aligned
+```
+#### Nash Training
+```python
+accelerate launch train.py --wandb --mtl_method Nash
 ```
 
 ### Generate
