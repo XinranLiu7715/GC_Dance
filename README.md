@@ -1,7 +1,7 @@
 # GCDance: Genre-Controlled 3D Full Body Dance Generation Driven By Music
-GCDance is a diffusion-based model for generating genre-specific dance motions conditioned on both music and textual prompts. This approach enables the model to generate diverse dance styles from the same piece of music while ensuring coherence with the rhythm and melody of the music. The demos can be seen on supplementary materials.
+GCDance is a diffusion-based model for generating genre-specific dance motions conditioned on both music and textual prompts. This approach enables the model to generate diverse dance styles from the same piece of music while ensuring coherence with the rhythm and melody of the music. The demos can be seen on **supplementary materials**.
 
-![GCDance cover](images/top-1.png)
+![GCDance cover](images/top-1.jpg)
 
 ## Data preparation
 
