@@ -1,3 +1,4 @@
+<div align="center">
 # GCDance: Genre-Controlled 3D Full Body Dance Generation Driven By Music
 
 
@@ -16,6 +17,7 @@ convey specific stylistic attributes in generated dance. To bridge this
 gap, we propose a diffusion-based framework for genre-specific 3D
 full-body dance generation, conditioned on both music and descrip-
 tive text.
+</div>
 
 
 
