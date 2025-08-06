@@ -10,7 +10,7 @@ gap, we propose a diffusion-based framework for genre-specific 3D
 full-body dance generation, conditioned on both music and descrip-
 tive text.
 
-The demos of GCDance can be seen on **supplementary materials**.
+
 
 ![GCDance cover](images/top-1.jpg)
 
