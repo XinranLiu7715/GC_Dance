@@ -7,16 +7,8 @@
 
 ![GCDance cover](images/top-1.jpg)
 </div>
-It is a challenging task to generate high-quality full-body dance
-sequences from music, as this requires strict adherence to genre-
-specific choreography while ensuring physically realistic and pre-
-cisely synchronized dance sequences with the music’s beats and
-rhythm. Although significant progress has been made in music-
-conditioned dance generation, most existing methods struggle to
-convey specific stylistic attributes in generated dance. To bridge this
-gap, we propose a diffusion-based framework for genre-specific 3D
-full-body dance generation, conditioned on both music and descrip-
-tive text.
+
+Music driven dance generation is challenging because a model must respect genre conventions, preserve physical realism, and synchronize movements with beats and rhythm at high precision. Despite recent progress in music conditioned generation, many methods still struggle to express distinctive genre specific style. We present GCDance, a diffusion based framework for genre specific 3D full body dance generation conditioned on music and descriptive text. The approach introduces a text based control mechanism that converts prompts, including explicit genre labels and free form descriptions, into genre specific control signals, enabling accurate and controllable synthesis of genre consistent motion. To strengthen cross modal alignment between audio and text, we incorporate representations from a music foundation model, which leads to coherent and semantically aligned dance. We further propose a multi task optimization strategy that balances the extraction of text genre information with motion quality by jointly optimizing physical realism, spatial accuracy, and text classification. Extensive experiments on FineDance and AIST++ demonstrate that GCDance outperforms state of the art methods. The source code and demonstration videos are available online.
 
 
 
