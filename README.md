@@ -7,7 +7,7 @@
 
 ![GCDance cover](images/top-1.jpg)
 </div>
-Music driven dance generation is challenging because a model must respect genre conventions, preserve physical realism, and synchronize movements with beats and rhythm at high precision. Despite recent progress in music conditioned generation, many methods still struggle to express distinctive genre specific style. We present GCDance, a diffusion based framework for genre specific 3D full body dance generation conditioned on music and descriptive text. The approach introduces a text based control mechanism that converts prompts, including explicit genre labels and free form descriptions, into genre specific control signals, enabling accurate and controllable synthesis of genre consistent motion.
+Music-driven dance generation is a challenging task, as models must respect genre conventions, preserve physical realism, and achieve fine-grained synchronization between movement and musical beat and rhythm. Despite recent progress in music conditioned generation, many methods still struggle to express distinctive genre specific style. We present GCDance, a diffusion based framework for genre specific 3D full body dance generation conditioned on music and descriptive text. The approach introduces a text based control mechanism that converts prompts, including explicit genre labels and free form descriptions, into genre specific control signals, enabling accurate and controllable synthesis of genre consistent motion.
 
 
 
