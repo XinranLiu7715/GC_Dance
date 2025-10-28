@@ -13,8 +13,8 @@ from dataset.preprocess import Normalizer, vectorize_many
 
 def parse_eval_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--motion_dir', type=str, default='dataset/finedance/motion')
-    parser.add_argument('--store_dir', type=str, default='dataset/train/motion_fea319')
+    parser.add_argument('--motion_dir', type=str, default='data/finedance/motion')
+    parser.add_argument('--store_dir', type=str, default='data/train/motion_fea319')
     args = parser.parse_args()
     return args
 

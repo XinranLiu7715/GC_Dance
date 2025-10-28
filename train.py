@@ -13,14 +13,14 @@ from accelerate import Accelerator, DistributedDataParallelKwargs
 from accelerate.state import AcceleratorState
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from dataset.FineDance_dataset import FineDance_Smpl
+from dataset.pre_dataset import FineDance_Smpl
 from dataset.preprocess import increment_path
 from dataset.preprocess import My_Normalizer as Normalizer        
 from model.adan import Adan
 from model.diffusion import GaussianDiffusion
 from model.model import DanceDecoder,SeqModel
 from vis import SMPLX_Skeleton, SMPLSkeleton
-from train_w_test import test
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 def wrap(x):
     return {f"module.{key}": value for key, value in x.items()}
@@ -94,11 +94,8 @@ class GCdance:
             guidance_weight=2.7,
             do_normalize = opt.do_normalize,
             mtl_method = opt.mtl_method,
-            Classification = opt.Classification
         )
         
-        #for param in model.network['body_net'].SimpleClassifier.parameters():
-        #    param.requires_grad = False
 
         print(
             "Model has {} parameters".format(sum(y.numel() for y in model.parameters()))
@@ -162,7 +159,7 @@ class GCdance:
             wdir = save_dir / "weights"
             wdir.mkdir(parents=True, exist_ok=True)
             if opt.wandb:
-                wandb.save("params.yaml")  # 保存wandb配置到文件
+                wandb.save("params.yaml")  
             yaml_path = os.path.join(wdir, 'parameters.yaml')
             save_arguments_to_yaml(opt, yaml_path)
 

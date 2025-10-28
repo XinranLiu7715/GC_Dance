@@ -1,4 +1,4 @@
-from methods.weight_methods import (
+from methodMTL.Nash.weight_methods import (
     METHODS,
     MGDA,
     STL,

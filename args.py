@@ -7,21 +7,21 @@ def train_opt():
     parser.add_argument("--exp_name", default="GcDance", help="save to project/name")
     parser.add_argument("--feature_type", type=str, default="baseline")
     parser.add_argument("--datasplit", type=str, default="cross_genre", choices=["cross_genre", "cross_dancer"])
-    parser.add_argument("--data_path", type=str, default="dataset/", help="raw data path")
+    parser.add_argument("--data_path", type=str, default="data/", help="raw data path")
     parser.add_argument(
         "--render_dir", type=str, default="renders", help="Sample render path"
     )
     parser.add_argument(
-        "--motion_dir", type=str, default="dataset/train/motion_fea319", help="dataset motion"
+        "--motion_dir", type=str, default="data/train/motion_fea319", help="Motion Feature"
     )
     parser.add_argument(
-        "--music_fm_dir", type=str, default="dataset/train/wav2clip_fea", help="Hand-crafted Feature"
+        "--music_fm_dir", type=str, default="data/train/wav2clip_fea", help="Hand-crafted Feature"
     )
     parser.add_argument(
-        "--music_basic_dir", type=str, default="dataset/Basic_music_fea/stft", help="Music Foundation Model Feature"
+        "--music_basic_dir", type=str, default="data/Basic_music_fea/stft", help="Music Foundation Model Feature"
     )
     parser.add_argument(
-        "--wav_dir", type=str, default="dataset/finedance/music_wav", help="Raw music data"
+        "--wav_dir", type=str, default="data/finedance/music_wav", help="Raw music data"
     )
     parser.add_argument(
         "--full_seq_len", type=int, default=120, help="full_seq_len"
@@ -35,7 +35,7 @@ def train_opt():
     parser.add_argument(
         "--wandb_pj_name", type=str, default="dance_gen", help="project name"
     )
-    parser.add_argument("--batch_size", type=int, default=128, help="batch size")       
+    parser.add_argument("--batch_size", type=int, default=60, help="batch size")       
     parser.add_argument("--epochs", type=int, default=2000)
     parser.add_argument(
         "--save_interval",
@@ -62,11 +62,8 @@ def train_opt():
         "--wandb", action="store_true", help="use wandby while training"
     )
     parser.add_argument(
-        "--genre_json", type=str, default='dataset/finedance/dance_lable_data.json', help="json file"
+        "--genre_json", type=str, default='data/dance_lable_data.json', help="json file"
     ) 
-    parser.add_argument(
-        "--Classification", action="store_true", help="use classify while training"
-    )
     parser.add_argument(
         "--mtl_method", type=str, default='Nash', help="Muti-Task Learning method"
     ) 
@@ -76,7 +73,7 @@ def train_opt():
 
 def test_opt(): 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_path", type=str, default="dataset/", help="raw data path")
+    parser.add_argument("--data_path", type=str, default="data/", help="raw data path")
     
     parser.add_argument("--feature_type", type=str, default="baseline")
     parser.add_argument(
@@ -91,7 +88,7 @@ def test_opt():
         "--render_dir", type=str, default="render", help="Sample render path"
     )
     parser.add_argument(
-        "--checkpoint", type=str, default="", help="checkpoint"
+        "--checkpoint", type=str, default="/mnt/fast/nobackup/scratch4weeks/xl01315/ACM/Muti-task/checkpoint/GCDance_align_ro3/train-900.pt", help="checkpoint"
     )
     
     parser.add_argument(
@@ -100,7 +97,7 @@ def test_opt():
     parser.add_argument(
         "--music_dir",
         type=str,
-        default="test/wavs",
+        default="data/finedance/music_wav",
         help="folder containing input music",
     )
     parser.add_argument(
@@ -145,7 +142,7 @@ def test_opt():
         help="Where to save/load the features",
     )
     parser.add_argument(
-        "--genre_json", type=str, default='dataset/finedance/dance_lable_data.json', help="json file"
+        "--genre_json", type=str, default='data/dance_lable_data.json', help="json file"
     ) 
     parser.add_argument(
         "--type", type=int, default=1, 
@@ -158,6 +155,9 @@ def test_opt():
         "--test_gen", 
         action="store_true", 
         help="Random test 10 times")
+    parser.add_argument(
+        "--mtl_method", type=str, default='Nash', help="Muti-Task Learning method"
+    ) 
     opt = parser.parse_args()
     return opt
 

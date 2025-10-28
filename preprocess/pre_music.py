@@ -13,8 +13,8 @@ import wav2clip
 
 def parse_eval_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--music_dir', type=str, default='dataset/finedance/music_wav')
-    parser.add_argument('--store_dir', type=str, default='dataset/train/music')
+    parser.add_argument('--music_dir', type=str, default='data/finedance/music_wav')
+    parser.add_argument('--store_dir', type=str, default='data/train/music')
     parser.add_argument('--sampling_rate', type=int, default=15360*2/8)
     args = parser.parse_args()
     return args

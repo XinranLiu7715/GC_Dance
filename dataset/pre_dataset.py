@@ -83,8 +83,8 @@ class FineDance_Smpl(data.Dataset):
         motion_all = []
         music_all = []
         
-        #train_list, test_list, ignor_list = get_train_test_list(args.datasplit)
-        train_list, test_list, ignor_list = tem_data()
+        train_list, test_list, ignor_list = get_train_test_list(args.datasplit)
+        #train_list, test_list, ignor_list = tem_data()
         
         if self.istrain:
             self.datalist= train_list
@@ -104,7 +104,7 @@ class FineDance_Smpl(data.Dataset):
                 continue
             motion = np.load(os.path.join(self.motion_dir, name))
             fm_music = np.load(os.path.join(self.music_fm_dir, name))
-            music_basic = np.load(os.path.join(self.music_basic_dir, name)).T
+            music_basic = np.load(os.path.join(self.music_basic_dir, name))
 
             if len(music_basic) < len(fm_music):
                 fm_music = fm_music[:len(music_basic)]
@@ -134,9 +134,9 @@ class FineDance_Smpl(data.Dataset):
             else:
                 index = np.arange(nums) * slide + total_length
                 index_ = np.arange(nums) * slide 
-
             motion_all.append(motion)
             music_all.append(music)
+            
             if args.mix:
                 motion_index = []
                 music_index = []
@@ -152,12 +152,12 @@ class FineDance_Smpl(data.Dataset):
                 motion_index = index.tolist()
                 music_index = index.tolist()
                 index_ = index_.tolist()
-            
 
             genre = self.name_to_style[save_name]
             prompt1 = 'This is a '
             prompt2 = ' type of music.'
             y = [prompt1 + genre + prompt2]
+            
             inputs = tokenizer(y, padding=True, return_tensors="pt")
             text_embeddings = model.get_text_features(**inputs)
             for i in index_:

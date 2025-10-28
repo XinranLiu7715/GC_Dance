@@ -16,8 +16,8 @@ import librosa as lr
 import soundfile as sf
 import pdb
 
-from args import FineDance_parse_test_opt
-from train_seq import EDGE
+from args import test_opt
+from train import GCdance
 # from data.audio_extraction.jukebox_features import extract as juke_extract
 from eval.eval_beat import calc_ba_score
 from eval.eval_pfc import calc_physical_score
@@ -148,12 +148,12 @@ def test(opt):
         print(idx,len(file_list))
 
         
-    model = EDGE(opt, opt.feature_type, opt.checkpoint)
+    model = GCdance(opt, opt.feature_type, opt.checkpoint)
     model.eval()
 
     # directory for optionally saving the dances for eval
 
-
+    pdb.set_trace()
     print("Generating dances")
     for i in range(len(all_cond)):
         data_tuple = None, all_cond[i], all_filenames[i], all_text_fea[i]
@@ -176,6 +176,6 @@ if __name__ == "__main__":
     opt = test_opt()
     if opt.test_gen:
         test(opt)
-    if opt.eval
+    if opt.eval:
         eval_metirc(opt)
 

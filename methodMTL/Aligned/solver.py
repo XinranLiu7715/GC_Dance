@@ -12,7 +12,7 @@ class ProcrustesSolver:
             cov_grad_matrix_e = torch.matmul(grads.permute(0, 2, 1), grads)
             cov_grad_matrix_e = cov_grad_matrix_e.mean(0)
 
-            singulars, basis = torch.symeig(cov_grad_matrix_e, eigenvectors=True)
+            singulars, basis = torch.linalg.eigh(cov_grad_matrix_e, UPLO='L')
             tol = (
                 torch.max(singulars)
                 * max(cov_grad_matrix_e.shape[-2:])
