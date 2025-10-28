@@ -13,44 +13,101 @@ Music-driven dance generation is a challenging task, as models must respect genr
 
 
 
-## Data preparation
+## Data Preparation
 
-In our experiments, we use FineDance dataset for both training and evaluation. Please visit [Google Drive](https://drive.google.com/file/d/1zQvWG9I0H4U3Zrm8d_QD_ehenZvqfQfS/view?usp=sharing) to download and download the required SMPL models from [here] (https://smpl-x.is.tue.mpg.de/) into './assets'.
+This project employs the **FineDance** dataset for both training and evaluation.
 
-### Data preparation
-To process the motion data.
+### 1️⃣ Download and Placement
+
+- **FineDance Dataset**  
+  Download from Google Drive and extract to `./data`:  
+  [Google Drive Link](https://drive.google.com/file/d/1zQvWG9I0H4U3Zrm8d_QD_ehenZvqfQfS/view?usp=sharing)
+
+- **SMPL Models**  
+  Download required SMPL models from the official SMPL-X website and place them in `./assets`:  
+  [SMPL/SMPL-X Official Site](https://smpl-x.is.tue.mpg.de/)  
+
+
+- **Textual Descriptive Dataset**  
+  (To be released soon)
+
+### 2️⃣ Preprocessing
+
+- **Motion feature extraction**
+```bash
+python preprocess/pre_motion.py \
+  --motion_dir ./data/finedance/motion \
+  --store_dir ./data/train/motion_fea319
+
+- **Music feature extraction**
+```bash
+python preprocess/pre_music.py \
+  --music_dir ./data/finedance/music_wav \
+  --store_dir ./data/train/music
+
+
+
+## Training
+
+To train the model:
+
 ```python
-python preprocess/pre_motion.py --motion_dir --store_dir
+accelerate launch train.py --wandb 
 ```
-To process the music data.
-```python 
-python preprocess/pre_music.py --music_dir --store_dir
-```
+### Multi-Task Learning Options
+We provide two multi-task optimization strategies.
+Note: Aligned training requires high GPU memory (recommended: NVIDIA A100). If using smaller GPUs, reduce the batch size accordingly.
 
-
-### Training
-We provide two training modes:
-#### Aligned Training
+**Aligned Training**
 ```python
 accelerate launch train.py --wandb --mtl_method Aligned
 ```
-#### Nash Training
+**Nash Training**
 ```python
 accelerate launch train.py --wandb --mtl_method Nash
 ```
+
+### Evaluation
+
+During evaluation, 18 music tracks are segmented into multiple 120-frame clips.
+For each track, 15 clips are randomly selected (totaling 270 segments) and repeated 10 times to compute the mean performance.
+
+You may either:
+
+- **Download preprocessed evaluation data**:  
+  [Google Drive](https://drive.google.com/file/d/16gwuESFSsbyRX-vdM41ubAbMNrsGs5IC/view?usp=sharing)
+
+or
+
+- **Generate the evaluation segments locally**:
+```bash
+python test_10.py
+
+
 
 ### Generate
 
 ```python
 python test.py --test_gen
 ```
-### Evaluate
 
-```python
-python test.py --eval --type 0
-```
 
 ### Visualization
 ```python
 python vis.py --motion_save_dir 
 ```
+
+## Citation
+
+If you find this work useful, please consider citing:
+
+```bibtex
+@article{liu2025gcdance,
+  title={GCDance: Genre-Controlled 3D Full Body Dance Generation Driven By Music},
+  author={Liu, Xinran and Dong, Xu and Kanojia, Diptesh and Wang, Wenwu and Feng, Zhenhua},
+  journal={arXiv preprint arXiv:2502.18309},
+  year={2025}
+}
+  
+## Acknowledgements
+We would like to express our sincere gratitude to the EDGE and FineDance projects for their foundational datasets and research support.
