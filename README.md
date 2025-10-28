@@ -38,13 +38,14 @@ This project employs the **FineDance** dataset for both training and evaluation.
 python preprocess/pre_motion.py \
   --motion_dir ./data/finedance/motion \
   --store_dir ./data/train/motion_fea319
+```
 
 - **Music feature extraction**
 ```bash
 python preprocess/pre_music.py \
   --music_dir ./data/finedance/music_wav \
   --store_dir ./data/train/music
-
+```
 
 
 ## Training
@@ -56,7 +57,7 @@ accelerate launch train.py --wandb
 ```
 ### Multi-Task Learning Options
 We provide two multi-task optimization strategies.
-Note: Aligned training requires high GPU memory (recommended: NVIDIA A100). If using smaller GPUs, reduce the batch size accordingly.
+Note: Aligned training requires high GPU memory (recommended:2 NVIDIA A100). 
 
 **Aligned Training**
 ```python
@@ -72,17 +73,21 @@ accelerate launch train.py --wandb --mtl_method Nash
 During evaluation, 18 music tracks are segmented into multiple 120-frame clips.
 For each track, 15 clips are randomly selected (totaling 270 segments) and repeated 10 times to compute the mean performance.
 
-You may either:
+To prepare the test data, you may either:
 
-- **Download preprocessed evaluation data**:  
+- **Option A — Process the test data manually**:
+ ```python
+python slice_test_data.py
+```
+
+- **Option B — Use the preprocessed test data**:
+  Download from Google Drive and place it in the project root directory:
   [Google Drive](https://drive.google.com/file/d/16gwuESFSsbyRX-vdM41ubAbMNrsGs5IC/view?usp=sharing)
 
-or
-
-- **Generate the evaluation segments locally**:
-```bash
+After preparing the data, run the following command to evaluate the randomly selected 270 motion segments:
+```python
 python test_10.py
-
+```
 
 
 ### Generate
@@ -108,6 +113,7 @@ If you find this work useful, please consider citing:
   journal={arXiv preprint arXiv:2502.18309},
   year={2025}
 }
-  
+```
+
 ## Acknowledgements
 We would like to express our sincere gratitude to the EDGE and FineDance projects for their foundational datasets and research support.
