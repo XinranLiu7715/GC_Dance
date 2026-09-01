@@ -79,9 +79,9 @@ class GaussianDiffusion(nn.Module):
             self.MTL = NashMTL(n_tasks=self.n_task, device=self.device)
         if self.mtl_method == 'Aligned':
             self.MTL = AlignedMTLBalancer(
-                scale_mode='min', 
-                scale_decoder_grad=False, 
-                compute_stats=True
+                scale_mode='min',
+                scale_decoder_grad=False,
+                compute_stats=False   # diagnostic-only metrics (svdvals) unused by training; cusolver svdvals crashes on 2080ti
             )
             
 

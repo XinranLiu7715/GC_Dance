@@ -35,6 +35,21 @@ def flip_pose(pose):
     pose[:,2::3] = -pose[:,2::3]
     return pose
 
+def load_stft_feat(path):
+    """Load an STFT feature file and return a real log-magnitude of shape (time, 193).
+
+    Files on disk are complex64 raw STFT saved as (freq=193, time). We transpose to
+    (time, 193), take the magnitude, and log1p-compress it so the values sit at the
+    same scale as the other music features. Feeding the raw complex real-part (|value|
+    up to ~130, unnormalized) makes the first training step blow up to NaN gradients.
+    """
+    arr = np.load(path)
+    if arr.shape[-1] != 193 and arr.shape[0] == 193:
+        arr = arr.T                       # (freq=193, time) -> (time, 193)
+    if np.iscomplexobj(arr):
+        arr = np.abs(arr)
+    return np.log1p(arr).astype(np.float32)
+
 def get_train_test_list(datasplit):
         all_list = []
         train_list = []
@@ -104,7 +119,7 @@ class FineDance_Smpl(data.Dataset):
                 continue
             motion = np.load(os.path.join(self.motion_dir, name))
             fm_music = np.load(os.path.join(self.music_fm_dir, name))
-            music_basic = np.load(os.path.join(self.music_basic_dir, name))
+            music_basic = load_stft_feat(os.path.join(self.music_basic_dir, name))
 
             if len(music_basic) < len(fm_music):
                 fm_music = fm_music[:len(music_basic)]

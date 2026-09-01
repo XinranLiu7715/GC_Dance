@@ -18,6 +18,7 @@ import pdb
 
 from args import test_opt
 from train import GCdance
+from dataset.pre_dataset import load_stft_feat
 # from data.audio_extraction.jukebox_features import extract as juke_extract
 from eval.eval_beat import calc_ba_score
 from eval.eval_pfc import calc_physical_score
@@ -126,7 +127,7 @@ def test(opt):
             filename = os.path.basename(wavs)
             wav_basic = os.path.join(music_basic_dir,filename).split('.')[0]+'.npy'
             reps = pickle.load(open(wavs, "rb"))[0]
-            reps_basic = np.load(wav_basic).T
+            reps_basic = load_stft_feat(wav_basic)
             reps =  np.concatenate((reps, reps_basic), axis=-1)
             cond_list.append(reps)
             wav_name = os.path.join(opt.data_path,'/test_all/wavs_sliced',filename.split('.')[0]+'.wav')
@@ -153,7 +154,6 @@ def test(opt):
 
     # directory for optionally saving the dances for eval
 
-    pdb.set_trace()
     print("Generating dances")
     for i in range(len(all_cond)):
         data_tuple = None, all_cond[i], all_filenames[i], all_text_fea[i]

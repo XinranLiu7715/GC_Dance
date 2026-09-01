@@ -22,6 +22,7 @@ import pdb
 
 from args import test_opt
 from train import GCdance
+from dataset.pre_dataset import load_stft_feat
 
 from eval.eval_beat import calc_ba_score
 from eval.eval_pfc import calc_physical_score
@@ -235,7 +236,7 @@ def test(opt):
                 filename = os.path.basename(file)
                 wav_fea_dir = os.path.join(music_fm_dir,file.split('/')[-1].replace('.wav','.pkl'))
                 basic_fea_dir = os.path.join(music_basic_dir,file.split('/')[-1].replace('.wav','.npy'))
-                reps_basic = np.load(basic_fea_dir).T
+                reps_basic = load_stft_feat(basic_fea_dir)
                 reps_fm = pickle.load(open(wav_fea_dir, "rb")) .T
                 reps =  np.concatenate((reps_fm, reps_basic), axis=-1)
                 wav_name = os.path.join(file.split(feature_type)[0],'wavs_sliced',filename.split('.')[0]+'.wav')

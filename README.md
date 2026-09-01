@@ -48,6 +48,18 @@ python preprocess/pre_music.py \
 ```
 
 
+## Pretrained Checkpoint
+
+We provide a pretrained GCDance checkpoint for evaluation and generation:
+
+[Google Drive Link](https://drive.google.com/file/d/1nLGLnKSJZWi2NigrK-v3HPtxGKQMGVem/view?usp=drive_link)
+
+Download it and place it under `./checkpoint`, then point to it with the `--checkpoint` argument when running `test.py` / `test_10.py`, e.g.:
+
+```python
+python test.py --test_gen --checkpoint ./checkpoint/train-1700.pt
+```
+
 ## Training
 
 To train the model:

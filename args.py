@@ -63,11 +63,11 @@ def train_opt():
     )
     parser.add_argument(
         "--genre_json", type=str, default='data/dance_lable_data.json', help="json file"
-    ) 
+    )
     parser.add_argument(
         "--mtl_method", type=str, default='Nash', help="Muti-Task Learning method"
-    ) 
-    
+    )
+
     opt = parser.parse_args()
     return opt
 
@@ -88,7 +88,7 @@ def test_opt():
         "--render_dir", type=str, default="render", help="Sample render path"
     )
     parser.add_argument(
-        "--checkpoint", type=str, default="/mnt/fast/nobackup/scratch4weeks/xl01315/ACM/Muti-task/checkpoint/GCDance_align_ro3/train-900.pt", help="checkpoint"
+        "--checkpoint", type=str, default="checkpoint/train-1700.pt", help="checkpoint"
     )
     
     parser.add_argument(
@@ -106,7 +106,7 @@ def test_opt():
     parser.add_argument(
         "--motion_save_dir",
         type=str,
-        default="test/motions",
+        default="tests/motions",
         help="Where to save the motions",
     )
     parser.add_argument(
@@ -138,26 +138,30 @@ def test_opt():
     parser.add_argument(
         "--data_dir",
         type=str,
-        default="/vol/research/CMVCG/xl/dataset/test_10",
+        default="data/test_10",
         help="Where to save/load the features",
     )
     parser.add_argument(
         "--genre_json", type=str, default='data/dance_lable_data.json', help="json file"
-    ) 
+    )
     parser.add_argument(
-        "--type", type=int, default=1, 
+        "--type", type=int, default=1,
         help="1 -> hand, 2 -> body, 3 -> plc & align")
     parser.add_argument(
         "--test_10", 
         action="store_true", 
         help="Random test 10 times")
     parser.add_argument(
-        "--test_gen", 
-        action="store_true", 
+        "--test_gen",
+        action="store_true",
         help="Random test 10 times")
     parser.add_argument(
+        "--eval",
+        action="store_true",
+        help="Compute evaluation metrics")
+    parser.add_argument(
         "--mtl_method", type=str, default='Nash', help="Muti-Task Learning method"
-    ) 
+    )
     opt = parser.parse_args()
     return opt
 
