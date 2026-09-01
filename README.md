@@ -57,7 +57,7 @@ We provide a pretrained GCDance checkpoint for evaluation and generation:
 Download it and place it under `./checkpoint`, then point to it with the `--checkpoint` argument when running `test.py` / `test_10.py`, e.g.:
 
 ```python
-python test.py --test_gen --checkpoint ./checkpoint/train-1700.pt
+python test.py --test_gen
 ```
 
 ## Training
@@ -119,11 +119,12 @@ python vis.py --motion_save_dir
 If you find this work useful, please consider citing:
 
 ```bibtex
-@article{liu2025gcdance,
-  title={GCDance: Genre-Controlled 3D Full Body Dance Generation Driven By Music},
-  author={Liu, Xinran and Dong, Xu and Kanojia, Diptesh and Wang, Wenwu and Feng, Zhenhua},
-  journal={arXiv preprint arXiv:2502.18309},
-  year={2025}
+@article{liu2026gcdance,
+  title={GCDance: Genre-Controlled Music-Driven 3D Full Body Dance Generation},
+  author={Liu, Xinran and Dong, Xu and Qian, Shenbin and Kanojia, Diptesh and Wang, Wenwu and Feng, Zhenhua},
+  journal={IEEE Transactions on Multimedia},
+  year={2026},
+  publisher={IEEE}
 }
 ```
 
